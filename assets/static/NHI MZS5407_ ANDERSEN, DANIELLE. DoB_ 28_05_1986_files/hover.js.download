@@ -1,0 +1,1170 @@
+/** Opens a help menu and places it over the location of the mouse */
+var wBPAC = null;
+
+function showHelp(event, id, popup) {
+	var el, IfrRef, x, y, h, t;
+	el = document.getElementById(id);
+	if (!el) return;
+	IfrRef = document.getElementById('DivShim');
+	if(!IfrRef) {IfrRef = el}
+
+	// don't run this if the element is already visible
+	// if(el.style.visibility == "visible") return;
+	if(el.style.display == "block") return;
+
+	// position help item and make it visible
+
+	var browserW = 0;
+	if( typeof( window.innerWidth ) == 'number' ) {
+		//Non-IE
+		browserW = window.innerWidth;
+	} else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
+		//IE 6+ in 'standards compliant mode'
+		browserW = document.documentElement.clientWidth;
+	} else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
+		//IE 4 compatible
+		browserW = document.body.clientWidth;
+	}
+	xOffset = ((browserW - 650) / 2) - 20;
+	if (popup == 1 || popup == 2) {xOffset = -20}
+	if (popup >= 3) {xOffset = -10}
+	if (window.event) {
+		x = window.event.clientX + document.documentElement.scrollLeft + document.body.scrollLeft;
+		y = window.event.clientY + document.documentElement.scrollTop + document.body.scrollTop;
+		h = document.body.offsetHeight + document.body.scrollTop - 4;
+		t = document.documentElement.scrollTop + document.body.scrollTop;
+	} else {
+		x = ((event)?event.clientX + window.scrollX:parseInt(IfrRef.style.left));
+		y = ((event)?event.clientY + window.scrollY:parseInt(IfrRef.style.top)+50);
+		h = window.innerHeight + window.scrollY - 4;
+		t = window.scrollX;
+	}
+    var cursorX = x;
+	iframeX = x + 20;
+	x -= xOffset;
+
+	el.style.left = x + "px";
+	el.style.display = "block";
+	if (popup == 1 || popup == 2) {
+		x = x - 50;
+		el.style.width = "400px";
+		el.style.backgroundImage = "url(images/bg_hoverbox.gif)";
+	} else if	(el.offsetHeight > 100 && popup == 5) {
+		el.style.left = "150px";
+		el.style.width = "550px";
+		el.style.backgroundImage = "url(images/bg_hover.gif)";
+	} else if (popup === 6) {
+		el.style.width = 'auto';
+		el.style.backgroundImage = 'none';
+    } else if	(el.offsetHeight > 100) {
+		el.style.width = "400px";
+		el.style.backgroundImage = "url(images/bg_hoverbox.gif)";
+	} else {
+		el.style.width = "350px";
+		el.style.backgroundImage = "url(images/bg_hoverbox_small.gif)";
+	}
+
+	if ((x+el.offsetWidth+20)>document.body.offsetWidth && popup != 5) {
+		x=x-(el.offsetWidth+30);
+        if (x < 0) {
+            x = cursorX + 5;
+        }
+		el.style.left = x + "px";
+	}
+
+	IfrRef.style.width = el.offsetWidth;
+	IfrRef.style.height = el.offsetHeight;
+	IfrRef.style.left = el.style.left;
+	IfrRef.style.zIndex = el.style.zIndex - 1;
+
+	y -= el.offsetHeight*.5;
+
+	if (y > h - parseInt(IfrRef.style.height)) {
+		y = h - parseInt(IfrRef.style.height)
+	}
+
+	if (y < t) {
+		y=t
+	}
+
+	if (popup != 2 && popup != 3 && popup != 4) {y -= 30}
+	el.style.top = y + "px";
+	IfrRef.style.top = y + 0 + "px";
+	if (popup != 4) {IfrRef.style.display = "block"}
+}
+
+/** Closes a help menu */
+function hideHelp(id)
+{
+	el = document.getElementById(id);
+	if(el){
+		el.style.display = "none";
+		IfrRef = document.getElementById('DivShim');
+		if(IfrRef) {IfrRef.style.display = "none"}
+	}
+}
+
+/** Display video clip */
+function popMedia(id){
+	 if(location.host == "localhost:80" || location.host == "localhost") {
+   	window.open("http://localhost/playerc.aspx?f="+id, "_popMedia", "width=650, height=570px");
+   } else {
+   	window.open("http://public.bestpractice.org.nz/playerc.aspx?f="+id, "_popMedia", "width=650, height=570px");	
+   }
+}
+
+/** Cancel an action */
+function CancelAction(id,sButton)
+{
+var btnA, btnC, img, action;
+
+btnA = document.getElementById('cmd_A' + id);
+btnC = document.getElementById('cmd_' + id);
+img = document.getElementById('img_' + id);
+action = document.getElementById('a_' + id);
+
+if (btnC.value == 'Cancel') {
+btnC.value='Revert';
+img.src='images/icon_exclude.gif';
+img.alt='Cancelled';
+action.disabled = false;
+action.value = -1;
+if (sButton != null && btnA) {btnA.value=sButton}
+}
+else
+{
+btnC.value='Cancel';
+img.src='gfx/spacer.gif';
+img.alt='';
+action.disabled = true;
+action.value = 0;
+}
+}
+
+/** Accept an action */
+function AcceptAction(id,sButton)
+{
+var btnA, btnC, img, action;
+
+btnA = document.getElementById('cmd_A' + id);
+btnC = document.getElementById('cmd_' + id);
+img = document.getElementById('img_' + id);
+action = document.getElementById('a_' + id);
+
+if (btnA.value != 'Revert') {
+btnA.value='Revert';
+img.src='images/icon_confirm2.gif';
+img.alt='Accepted';
+action.disabled = false;
+action.value = 1;
+if (btnC != null) {btnC.value='Cancel'}
+}
+else
+{
+btnA.value=sButton;
+img.src='gfx/spacer.gif';
+img.alt='';
+action.disabled = true;
+action.value = 0;
+}
+}
+
+function changePrint(url) {
+   obj = document.getElementsByTagName('LINK');
+   if (url) obj[0].href=url;
+   window.print();
+   return false;
+}
+
+/** Removes "Please Select" from drop downs */
+function nodefault(field)
+{
+    var version = parseFloat(navigator.appVersion.substr(22,3));
+if (field && field.options.length != 0) {
+	if (field.options[0].value == "[blank]") {
+        // This appears to be here to support IE6/7. Refactored as part of BPAC-3319 to support IE8+.
+	if ((version < 7.0 && field.value == "[blank]") || ((version >= 7.0 || isNaN(version)) && field.value != "[blank]"))
+	{field.options[0] = null;}
+}
+}
+}
+
+
+/** Pushes "Please Select" back into drop downs */
+function makedefault(field)
+{
+if (field.type.indexOf("select") != -1) {
+	if (field.options[0].value != "[blank]") {
+		field.length+=1;
+	  for (i = 1; i < field.length; i++) {
+	  	field.options[field.length - i].text = field.options[field.length - i -1].text;
+	  	field.options[field.length - i].value = field.options[field.length - i -1].value;
+	  }
+		field.options[0].text = "Please Select"
+		field.options[0].value = "[blank]"
+		field.value = "[blank]"
+	}
+}
+}
+
+/** Is this a numeric value? */
+function IsNumeric(sField)
+{
+   var ValidChars = "-0123456789.";
+   var IsNumber=true;
+   var Char;
+   var sText = sField.value;
+
+   if (sText.charAt(0) == ".") {sField.value = "0" + sText;}
+   for (i = 0; i < sText.length && IsNumber == true; i++)
+      {
+      Char = sText.charAt(i);
+      if (ValidChars.indexOf(Char) == -1)
+         {
+         IsNumber = false;
+         }
+      }
+   return IsNumber;
+   }
+   
+ /** Is this a numeric value? */
+function IsNumericC(sField)
+{
+   var ValidChars = "-0123456789.";
+   var IsNumber=true;
+   var Char;
+   var sText = sField;
+
+   if (sText.charAt(0) == ".") {sText = "0" + sText;}
+   for (i = 0; i < sText.length && IsNumber == true; i++)
+      {
+      Char = sText.charAt(i);
+      if (ValidChars.indexOf(Char) == -1)
+         {
+         IsNumber = false;
+         }
+      }
+   return IsNumber;
+   }
+
+/** Is this an integer? */
+function IsInteger(sField)
+{
+   var ValidChars = "-0123456789";
+   var IsNumber=true;
+   var Char;
+   var sText = sField.value;
+
+   for (i = 0; i < sText.length && IsNumber == true; i++)
+      {
+      Char = sText.charAt(i);
+      if (ValidChars.indexOf(Char) == -1)
+         {
+         IsNumber = false;
+         }
+      }
+   return IsNumber;
+   }
+
+/** Has a value been entered? */
+function IsEmpty(aTextField) {
+	 if (aTextField.value != null) {aTextField.value = aTextField.value.replace(/\s+$/,"")}
+   if ((aTextField.value.length==0) || (aTextField.value==null)) {
+      return true;
+   }
+   else { return false; }
+}
+
+/** Has a radio box been selected? */
+function IsRadio(txtRadio)
+{
+    if (typeof(txtRadio)=='undefined') {
+    	var invalid=false;
+    } else {
+    	var invalid=true;
+    	for (i=0, n=txtRadio.length; i<n; i++) {
+       	  if (txtRadio[i].checked) invalid = false;
+       	}
+    }
+	return invalid;
+}
+
+/** Return Radio number */
+function RadioNum(txtRadio)
+{
+	var numValue=-1;
+	if (txtRadio) {
+		for (i=0, n=txtRadio.length; i<n; i++) {
+	   	if (txtRadio[i].checked) numValue = i;
+	  }
+	}
+	return numValue;
+}
+
+/** Return Radio Value */
+function RadioVal(txtRadio, ynQuote)
+{
+	if (txtRadio) {
+		var RetVal="";
+		for (i=0, n=txtRadio.length; i<n; i++) {
+	   	if (txtRadio[i].checked) RetVal = txtRadio[i].value;
+	   }
+		if (RetVal =="" && txtRadio.value) {RetVal = txtRadio.value}
+	  if (ynQuote && String(RetVal).substring(0,1) == "'") {RetVal = String(RetVal).substring(1)}
+	  var iLen = String(RetVal).length;
+	  if (ynQuote && String(RetVal).substring(iLen,iLen-1) == "'") {RetVal = String(RetVal).substring(0,iLen-1)}
+		return RetVal;
+	}
+}
+
+/** Set Radio Value */
+function SetRadio(txtRadio, txtValue)
+{
+	if (txtRadio) {
+		for (i=0, n=txtRadio.length; i<n; i++) {
+			if (txtRadio[i].value == txtValue) {txtRadio[i].checked = true}
+   	}
+  }
+}
+
+
+/** Is this a valid date? */
+function IsDate_old(sDate) 
+{
+	var scratch = new Date(sDate.value);
+	var invalid = true;
+	if (scratch.toString() == "NaN" || scratch.toString() == "Invalid Date") {invalid = false}
+  return invalid;
+}
+
+
+function IsDate(sDate) 
+{
+	var valid = true;
+	if (typeof(Date.parseExact) === "undefined") {
+		var scratch = new Date(FormatDate(sDate.value,'dd/mmmm/yyyy'));
+		if (scratch.toString() == "NaN" || scratch.toString() == "Invalid Date") {valid = false}
+	} else {
+		if (Date.parseExact(sDate.value, 'd/M/yy') == null && Date.parseExact(sDate.value, 'd/M/yyyy') == null) {valid = false}
+	}
+	return valid;
+}
+
+
+/** Format date as british*/
+function FormatDate(DateToFormat,FormatAs){
+if(DateToFormat==""){return"";}
+if(!FormatAs){FormatAs="dd/mm/yyyy";}
+
+var strReturnDate;
+FormatAs = FormatAs.toLowerCase();
+DateToFormat = DateToFormat.toLowerCase();
+var arrDate
+var arrMonths = new Array("January","February","March","April","May","June","July","August","September","October","November","December");
+var strMONTH;
+var Separator = "/";
+var ISO_8601 = (FormatAs == 'iso_8601' || FormatAs == 'iso_8601a');
+
+while(DateToFormat.indexOf("st")>-1){
+DateToFormat = DateToFormat.replace("st","");
+}
+
+while(DateToFormat.indexOf("nd")>-1){
+DateToFormat = DateToFormat.replace("nd","");
+}
+
+while(DateToFormat.indexOf("rd")>-1){
+DateToFormat = DateToFormat.replace("rd","");
+}
+
+while(DateToFormat.indexOf("th")>-1){
+DateToFormat = DateToFormat.replace("th","");
+}
+
+if(DateToFormat.indexOf(".")>-1){
+Separator = ".";
+}
+
+if(DateToFormat.indexOf("-")>-1){
+Separator = "-";
+}
+
+
+if(DateToFormat.indexOf("/")>-1){
+Separator = "/";
+}
+
+if(DateToFormat.indexOf(" ")>-1){
+Separator = " ";
+}
+
+arrDate = DateToFormat.split(Separator);
+DateToFormat = "";
+	for(var iSD = 0;iSD < arrDate.length;iSD++){
+		if(arrDate[iSD]!=""){
+		DateToFormat += arrDate[iSD] + Separator;
+		}
+	}
+DateToFormat = DateToFormat.substring(0,DateToFormat.length-1);
+arrDate = DateToFormat.split(Separator);
+if(arrDate.length < 3 && ISO_8601==false){
+return "";
+}
+
+var DAY = arrDate[0];
+var MONTH = arrDate[1];
+var YEAR = arrDate[2];
+
+if (arrDate.length == 1) {
+	var YEAR = arrDate[0];
+	var MONTH = '0';
+	var DAY = '0';
+}
+
+if (arrDate.length == 2) {
+	var YEAR = arrDate[1];
+	var MONTH = arrDate[0];
+	var DAY = '0';
+	if(parseFloat(MONTH) > 12){
+		YEAR = arrDate[0];
+		MONTH = arrDate[1];
+	}
+}
+
+if(parseFloat(MONTH) > 12){
+DAY = arrDate[1];
+MONTH = arrDate[0];
+}
+
+if(parseFloat(DAY) && DAY.toString().length==4){
+YEAR = arrDate[0];
+DAY = arrDate[2];
+MONTH = arrDate[1];
+}
+
+if((parseFloat(DAY) < 1 || parseFloat(DAY) > 31 || parseFloat(MONTH) < 1 || parseFloat(MONTH) > 12) && ISO_8601==false){
+return "";
+}
+
+for(var iSD = 0;iSD < arrMonths.length;iSD++){
+var ShortMonth = arrMonths[iSD].substring(0,3).toLowerCase();
+var MonthPosition = DateToFormat.indexOf(ShortMonth);
+	if(MonthPosition > -1){
+	MONTH = iSD + 1;
+		if(MonthPosition == 0 && ISO_8601==false){
+		DAY = arrDate[1];
+		YEAR = arrDate[2];
+		}
+	break;
+	}
+}
+
+var strTemp = YEAR.toString();
+if(strTemp.length<3){
+
+	if(parseFloat(YEAR)>20){
+	YEAR = 1900 + parseFloat(YEAR);
+	}
+	else{
+	YEAR = 2000 + parseFloat(YEAR);
+	}
+
+}
+
+	if (parseFloat(DAY)<1 || parseFloat(DAY)>31) DAY = "00";
+	if (parseFloat(MONTH)<1 || parseFloat(MONTH)>12) {MONTH = "00";DAY = "00";}
+	if (parseFloat(MONTH)!=0 && parseFloat(DAY) !=0) {
+		if ((parseFloat(MONTH)==4||parseFloat(MONTH)==6||parseFloat(MONTH)==9||parseFloat(MONTH)==11) && parseFloat(DAY) >30) DAY="30";
+		if (parseFloat(MONTH)==2 && parseFloat(DAY)>29) DAY="29";
+		if (parseFloat(MONTH)==2 && parseFloat(DAY)>28 && (parseFloat(YEAR)%4!=0 ||(parseFloat(YEAR)%100==0 && parseFloat(YEAR)%400!=0))) DAY="28";
+	}
+	if((parseFloat(DAY) < 1 || parseFloat(DAY) > 31 || parseFloat(MONTH) < 1 || parseFloat(MONTH) > 12) && ISO_8601==false){
+	return "";
+	}
+
+	if(parseFloat(MONTH)< 10 && MONTH.toString().length < 2){
+	MONTH = "0" + MONTH;
+	}
+	if(parseFloat(DAY)< 10 && DAY.toString().length < 2){
+	DAY = "0" + DAY;
+	}
+	switch (FormatAs){
+	case "dd/mm/yyyy":
+	return DAY + "/" + MONTH + "/" + YEAR;
+	case "mm/dd/yyyy":
+	return MONTH + "/" + DAY + "/" + YEAR;
+	case "dd/mmm/yyyy":
+	return DAY + " " + arrMonths[MONTH -1].substring(0,3) + " " + YEAR;
+	case "mmm/dd/yyyy":
+	return arrMonths[MONTH -1].substring(0,3) + " " + DAY + " " + YEAR;
+	case "dd/mmmm/yyyy":
+	return DAY + " " + arrMonths[MONTH -1] + " " + YEAR;
+	case "mmmm/dd/yyyy":
+	return arrMonths[MONTH -1] + " " + DAY + " " + YEAR;
+	case "yyyymmdd":
+	return YEAR + MONTH + DAY;
+	case "iso_8601":
+	return YEAR + ((MONTH=="00")?"":"-" + MONTH) + ((DAY=="00")?"":"-" + DAY);
+	case "iso_8601a":
+	return ((DAY=="00")?"":DAY+"/") + ((MONTH=="00")?"":MONTH+"/") + YEAR;
+	}
+
+return DAY + "/" + MONTH + "/" + YEAR;;
+
+} //End Function
+
+
+//add leading zero
+function addZero(vNumber){
+  return ((vNumber < 10) ? "0" : "") + vNumber
+}
+
+
+
+//Quick date formatting
+function formatDate2(vDate, vFormat) {
+    var vDateString = '';
+    if (vDate != null && vDate != '') {
+        if (!(vDate instanceof Date)) {
+            vDate = new Date(vDate);
+        }
+        var vDay = addZero(vDate.getDate());
+        var vMonth = addZero(vDate.getMonth() + 1);
+        var arrMonths = new Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
+        var cMonth = arrMonths[vMonth - 1]
+        var vYearLong = addZero(vDate.getFullYear());
+        var vYearShort = addZero(vDate.getFullYear().toString().substring(2, 4));
+        var vYear = (vFormat.indexOf("yyyy") > -1 ? vYearLong : vYearShort)
+        var vHour = addZero(vDate.getHours());
+        var vMinute = addZero(vDate.getMinutes());
+        var vSecond = addZero(vDate.getSeconds());
+        var vDateString = vFormat.replace(/dd/g, vDay).replace(/MMM/g, cMonth).replace(/MM/g, vMonth).replace(/yyyy/g, vYear);
+        vDateString = vDateString.replace(/yy/g, vYearShort).replace(/hh/g, vHour).replace(/mm/g, vMinute).replace(/ss/g, vSecond);
+        if (vDay.toString() == "NaN") vDateString = '';
+    }
+    return vDateString
+}
+
+
+//difference between two dates
+function date_diff(period, Date1, Date2) {
+	var numDiff = 0;
+	var numDiv = 1;
+
+  if (Date1==='datenow') {
+  	var dtStart = new Date();
+  	dtStart = str2dt(formatDate2(dtStart,"dd/MM/yyyy"))
+	} else if (Date1.length) {
+	  var dtStart = str2dt(Date1)
+	} else {
+	  var dtStart = Date1
+	}
+
+  if (Date2==='datenow') {
+  	var dtEnd = new Date()
+	} else if (Date2.length) {
+	  var dtEnd = str2dt(Date2)
+  	dtEnd = str2dt(formatDate2(dtEnd,"dd/MM/yyyy"))
+	} else {
+	  var dtEnd = Date2
+	}
+
+    if (dtStart===undefined || dtEnd===undefined) return NaN;
+
+	if (period == 'years') {numDiv = 31557600000}
+  else if (period == 'months') {numDiv = 2629800000}
+  else if (period == 'days') {numDiv = 24 * 60 * 60 * 1000}
+  else if (period == 'hours') {numDiv = 60 * 60 * 1000}
+  else if (period == 'mins') {numDiv = 60 * 1000}
+  else if (period == 'secs') {numDiv = 1000}
+  else {alert('Unknown period: ' + period)}
+
+  numDiff = Math.floor((dtEnd.valueOf() - dtStart.valueOf())/numDiv);
+
+  //lets handle years a bit differently
+  if (period === 'years') {
+	var tday = dtEnd.getDate();
+	var tmo = dtEnd.getMonth();
+	var tyr = dtEnd.getFullYear();
+	
+	var bday = dtStart.getDate();
+	var bmo = dtStart.getMonth();
+	var byr = dtStart.getFullYear();
+	
+	if((tmo > bmo)||(tmo==bmo && tday>=bday))
+	{numDiff=tyr - byr}
+	else
+	{numDiff=tyr - (byr + 1)}
+  }
+
+return numDiff
+}
+
+
+function modalWin(sURL, sName, nWidth, nHeight, sScroll, sModal) {
+var txtHost = location.href;
+txtHost = txtHost.toLowerCase();
+var txtURL = sURL.toLowerCase();
+var ynModal = true;
+var ynClosed = false;
+
+if (sModal == 'no') {
+	ynModal = false;
+}
+
+try {ynClosed = wBPAC.closed}
+catch(e)
+{ynClosed = true}
+
+if (window.showModalDialog && ynModal) {
+	nHeight += 20;
+	if (sScroll == 'yes') {
+		nWidth += 50;
+		nHeight += 20;
+	}
+	sURL += ((sURL.indexOf('?') == -1)?'?':'&') + 'wintype=modal';
+	window.showModalDialog(sURL , sName, "dialogHeight:" + nHeight + "px; dialogWidth:" + nWidth + "px; scroll:" + sScroll + "; status:no; resizable:yes; help:no; center:no;"); }
+else if(!ynClosed) {wBPAC.focus();alert('Form already open, please check your taskbar.')}
+
+//Special handling for Indici/Chrome attachments popup
+//NB: Resulting window is NOT modal
+else if (window.showModalDialog===undefined && ynModal && sURL.indexOf("insert_session.asp") != -1) {
+        wBPAC = window.open(sURL, "BPAC_modal", "width=" + nWidth + ", height=" + nHeight + ", scrollbars=" + sScroll + ", status=no, resizable=yes");
+    }
+
+else {
+    //BPAC-1304: window.open sometimes causing script error
+    var sWindow = "BPAC_" + Math.floor((Math.random() * 1000000) + 1);
+    try {
+        wBPAC = window.open(sURL, sWindow, "width=" + nWidth + ", height=" + nHeight + ", scrollbars=" + sScroll + ", status=no, resizable=yes");
+    } catch(e) {
+        try {
+            wBPAC = window.open(sURL, sWindow, "width=" + nWidth + ", height=" + nHeight + ", scrollbars=" + sScroll + ", status=no, resizable=yes");
+        } catch(e) {
+
+//After 2nd failed attempt try launching form as Modal window
+            if (window.showModalDialog) {
+                LogWriteErrors('hover.js', 'scripts\hover.js', 'window.open error - relaunch as modal', 'javascript error', e.message, sURL);
+            	nHeight += 20;
+            	if (sScroll == 'yes') {
+            		nWidth += 50;
+            		nHeight += 20;
+            	}
+            	sURL += ((sURL.indexOf('?') == -1)?'?':'&') + 'wintype=modal';
+            	window.showModalDialog(sURL , sName, "dialogHeight:" + nHeight + "px; dialogWidth:" + nWidth + "px; scroll:" + sScroll + "; status:no; resizable:yes; help:no; center:no;"); 
+            } else {
+                LogWriteErrors('hover.js', 'scripts\hover.js', 'window.open error', 'javascript error', e.message, sURL);
+                alert("There was an error with this form that has prevented it from functioning correctly.\nPlease contact the Best Practice help desk for assistance.");
+            }
+
+        }
+    }
+}
+}
+
+
+// Launches a child 'Layout editor' form after retrieving Arezzo module & session details (replacement for eq_5d_184.js)
+// Example of use:  var _DSForm = new popupForm(930);
+//                  _DSForm.modal='no';
+//                  _DSForm.URL='http://www.google.com'; 
+//                  _DSForm.launch();
+//
+// Can be launched immediately if using defaults: popupForm(930,-1);
+function popupForm(numForm, launch) {
+    this.numSession   = jQuery('#SessionID').val();
+    this.numPage      = jQuery('#PageID').val();
+    this.txtGuideline = jQuery('#txtGuideline').val();
+    this.txtName      = jQuery('#txtUName').val();
+    this.numForm      = numForm;
+    this.URL          = 'nl_CustomForm.asp?numForm=' + this.numForm + '&txtGuideline=' + this.txtGuideline + '&SessionID=' + this.numSession + '&PageID=' + this.numPage + '&txtUName=' + this.txtName;
+    this.width        = 700;
+    this.height       = 250;
+    this.scroll       = 'yes';
+    this.modal        = 'yes';
+    
+    this.launch = function() {
+      modalWin(this.URL, self, this.width, this.height, this.scroll, this.modal);
+    }
+    
+    if (launch != null) this.launch();
+}
+
+
+//Return string in proper case
+function toProperCase(s)
+{
+  return s.toLowerCase().replace(/^(.)|\s(.)|\-(.)/g, function($1) { return $1.toUpperCase(); });
+}
+
+
+//Resize textareas to fit all text
+function autosize()
+{ 
+	var form = document.forms["frmData"];
+	var element;
+
+	for (i=0; i<form.elements.length; i++) {
+		element = form.elements[i];
+		if (element.type == "textarea" && !element.readOnly) {
+			element.style.height = element.scrollHeight + 2 + "px";
+			element.style.overflow = "hidden";
+		}
+	}
+} 
+
+
+function dynamautosize(textbox, txtPMS, ynPopup, ynReadOnly, nMinimum, nLength)
+{
+//Truncate field if length specified. 
+//-ve length means silent truncation
+if (nLength) {
+	if (nLength != 0 && textbox.value.length > Math.abs(nLength)) {
+		if (nLength > 0) {alert('Maximum length of ' + nLength +' characters reached.')}
+		textbox.value = textbox.value.substring(0,Math.abs(nLength))
+		}
+	}
+	
+var pNode = textbox.parentNode;
+var nPixels = -2;
+if (navigator.appVersion.substr(22,3) == "7.0" && txtPMS == 'Unknown') {nPixels = -4}
+if (ynPopup == 'True') {nPixels = 2}
+if (pNode) {
+	for (i=0; i<10; i++) {
+			if (pNode.nodeName == 'DIV') {
+				if (document.getElementById(pNode.id).style.display != "none") {
+					if (ynReadOnly != 'True') {
+						if (nPixels < nMinimum - textbox.scrollHeight) {nPixels = nMinimum - textbox.scrollHeight}
+					}
+					if (textbox.scrollHeight + nPixels < 0) nPixels=0;
+					textbox.style.height = textbox.scrollHeight + nPixels + "px";
+					textbox.style.overflow = "hidden";
+				}
+				i = 10;
+			}
+			pNode = pNode.parentNode;
+	}
+}
+}
+
+function dynamautosize_adm(textbox)
+{ 
+	var form = document.forms["frmData"];
+	var element;
+
+	for (i=0; i<form.elements.length; i++) {
+		element = form.elements[i];
+		if (element.type == "textarea") {
+			element.style.height = element.scrollHeight + 2 + "px";
+			element.style.overflow = "hidden";
+		}
+	}
+} 
+
+function mask(str,textbox,loc,delim){
+var locs = loc.split(',');
+for (var i = 0; i <= locs.length; i++){
+	for (var k = 0; k <= str.length; k++){
+	 if (k == locs[i]){
+	  if (str.substring(k, k+1) != delim){
+	  	if (event.keyCode != 8){ //backspace
+	    	str = str.substring(0,k) + delim + str.substring(k,str.length)
+	  	}
+		}
+	}
+ }
+}
+if (event.keyCode != 37 && event.keyCode != 39 && event.keyCode != 46) {
+		textbox.value = str.replace(delim + delim,delim);
+}
+}
+
+
+function setfocus(dataitem) {
+//	dataitem.focus();
+}
+
+function getFields (obj) {
+      var imgs = new Array();
+      var iCnt=0;
+      if (!obj) { return; }
+      for (var ix=0; ix < obj.childNodes.length; ix++) {
+            var cObj = obj.childNodes[ix];
+            if (cObj.childNodes.length != 0) {getFields (cObj)}
+            if (!cObj.tagName) { continue; }
+            if (cObj.tagName.toLowerCase().match('input')) {
+                  alert(cObj.name);
+                  cObj.value = 'x';
+            }
+      }
+      return imgs;
+}
+
+function clearFields(divID) {
+	 var imgs = new Array();
+      var iCnt=0;
+      if (!divID) { return; }
+      for (var ix=0; ix < divID.childNodes.length; ix++) {
+            var cObj = divID.childNodes[ix];
+            if (cObj.childNodes.length != 0) {clearFields (cObj)}
+            if (!cObj.tagName) { continue; }
+            if (cObj.tagName.toLowerCase().match('input') || cObj.tagName.toLowerCase().match('textarea')) {
+            		 if (cObj.name.match("q_LB") == null && cObj.name.match("q_Blood") == null && cObj.name.match("q_Labs") == null) {
+									  cObj.value = '';
+                  	cObj.checked = false;
+                 }
+            }
+            if (cObj.tagName.toLowerCase().match('select')) {
+									makedefault(document.getElementById(cObj.name));
+            }
+      }
+      return imgs;
+}
+
+//Are two or more chronic conditions selected for care plus enrolment
+function Conditions2() {
+		var Count
+		Count = 0;
+	
+		//Store the Questions in an array
+		var SubVal= new Array(13)
+		SubVal[0]=document.getElementById('chk_Chronic_Asthma'); 
+		SubVal[1]=document.getElementById('chk_Chronic_CVD'); 
+		SubVal[2]=document.getElementById('chk_Chronic_CKD'); 
+		SubVal[3]=document.getElementById('chk_Chronic_COPD'); 
+		SubVal[4]=document.getElementById('chk_Chronic_Diabetes');
+		SubVal[5]=document.getElementById('chk_Chronic_Elderly');
+		SubVal[6]=document.getElementById('chk_Chronic_Cancer');
+		SubVal[7]=document.getElementById('chk_Chronic_Mental_Health'); 
+		SubVal[8]=document.getElementById('chk_Chronic_Osteoarthritis');
+		SubVal[9]=document.getElementById('q_Care_Plus_Criteria_Chronic_Other1_Code');
+		SubVal[10]=document.getElementById('q_Care_Plus_Criteria_Chronic_Other2_Code');
+		SubVal[11]=document.getElementById('q_Care_Plus_Criteria_Chronic_Other3_Code');
+		SubVal[12]=document.getElementById('q_Care_Plus_Criteria_Chronic_Other4_Code');
+		
+		//determine Count value
+		for (j=0; j < SubVal.length; j++) {
+				if((SubVal[j].type == "checkbox" && SubVal[j].checked == true) || (SubVal[j].type == "textarea" && (SubVal[j].value != "" && SubVal[j].value.substring(0,1) != " "))) {
+						Count += 1;
+				}
+		} 
+		return Count
+}
+
+function allOrNone(mcbID, numBlank) {
+	alert(mcbID.name);
+		if (mcbID[numBlank].checked) {
+			for (var i=0; i < mcbID.length; i++) {
+      	if(i != numBlank) {
+      		mcbID[i].checked = false;
+      	}
+     	}
+   	}
+}
+
+function chkObject(inParent,theVal) {
+if(inParent){
+if (window.opener.document.getElementById(theVal) != null) {
+return true;
+} else {
+return false;
+}
+}else{
+if (document.getElementById(theVal) != null) {
+return true;
+} else {
+return false;
+}
+}
+}
+
+function ClearError() {
+    jQuery("input[type='radio'].ent_error").each(function () {
+        jQuery(this).css("box-shadow","0 0 0 0");
+    });
+    jQuery(".ent_error").each(function () {
+        jQuery(this).removeClass().addClass('ent_input');
+    });
+}
+
+function ReadCode() {
+alert('Read codes extracted from PMS cannot be updated. \nPlease add a new diagnosis code if the original diagnosis is incorrect.');
+}
+
+function noquote(txtValue) {
+	// Strip leading and trailing ' marks
+	if (txtValue.charAt(0) == "'" && txtValue.charAt(txtValue.length-1) == "'") {
+     txtValue = txtValue.slice(1,txtValue.length-1);
+   }
+   txtValue = txtValue.replace("+","%2B");
+   return txtValue;
+}
+
+//Strip out RTF formatting
+function StripRTF(s,ynHTML)
+{
+	var txtValue = '';
+	if (s != null) {
+		txtValue = s.replace(/\\x5C/g, '\\');
+		txtValue = txtValue.replace(/\{\\\*\\generator Msftedit ([0-9]|\.)*;\}/g, '');	// e.g. /{\*\generator Msftedit 5.41.15.1515;}/ - which was appearing under Adverse Reactions on eReferrals launched from Profile
+		txtValue = txtValue.replace(/\\x0D\\x0A/g, ' ');
+		txtValue = txtValue.replace(/\r\n/g, ' ');
+		txtValue = txtValue.replace(/\n/g, ' ');
+		txtValue = txtValue.replace(/\r/g, ' ');
+		txtValue = txtValue.replace(/\\x27/g, '\'');
+		txtValue = txtValue.replace(/\\x22/g, '"');
+		
+		txtValue = txtValue.replace(/\\\\/g, ' xSCNx');
+		txtValue = txtValue.replace(/\\par\s/g, '\n\r');
+		txtValue = txtValue.replace(/\\tab\s/g, '\t');
+		txtValue = txtValue.replace(/{\\fonttbl.*}}|{\\colortbl.*;}/g, '');
+		txtValue = txtValue.replace(/\\[a-z0-9\\]+\s/g, '');
+		txtValue = txtValue.replace(/\{|\}/g, '');
+		txtValue = txtValue.replace(/\sxSCNx/g, '\\');
+		txtValue = txtValue.replace(/xSCNx/g, '\\');
+
+		txtValue = txtValue.replace(/^\s+|\s+$/g,"");
+
+//Removes HTML tags (crudely)
+		if (ynHTML) {txtValue = txtValue.replace(/<[^>]+>/ig,'')}
+	}
+  return txtValue;
+}
+
+function PopupDialog(){
+	hideHelp('print_dialog');
+	var IfrRef = document.getElementById('print_dialog');
+
+	this.popup = function(event){
+        var sHTML = '<p class="Subtitle">' + this.msg + '</p>' + '<p>' + this.options + '</p>';
+        if (this.yes) sHTML += '<input type="button" value="Yes" class="Button" ID="Popup_Yes" onClick="javascript: PConfirm(\'Yes\',\'' + this.msg + '\')">';
+        if (this.okay) sHTML += '<input type="button" value="OK" class="Button" ID="Popup_OK" onClick="javascript: PConfirm(\'OK\',\'' + this.msg + '\')">';
+        if (this.no) sHTML += '<input type="button" value="No" class="Button" ID="Popup_No" onClick="javascript: PConfirm(\'No\',\'' + this.msg + '\')">';
+        if (this.attach) sHTML += '<input type="button" value="Attach" class="Button" ID="Popup_Cancel" onClick="javascript:jAttach();return false">';
+        if (this.kontinue) sHTML += '<input type="button" value="Continue" class="Button" ID="Popup_Continue" onClick="javascript: PConfirm(\'Continue\',\'' + this.msg + '\')">';
+        if (this.cancel) sHTML += '<input type="button" value="Cancel" class="Button" ID="Popup_Cancel" onClick="javascript: PConfirm(\'Cancel\',\'' + this.msg + '\')">';
+	    if (typeof(MedTech)!=='undefined' && this.recall) {
+            sHTML += '<p>Generate recall&nbsp;&nbsp;&nbsp;<input type="checkbox" name="ynRecall" id="ynRecall"'
+                  + ((getPreference(jQuery('#txtUName').val(),'eReferrals.Recall')==='true')?' checked':'') + ' onclick=\'Recall();\'>'
+                  + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input name="dtmRecall" id="dtmRecall" type="text" size=8></p>';
+        }
+
+		if (this.move) {
+			if (window.event) {
+				x = window.event.clientX + document.documentElement.scrollLeft + document.body.scrollLeft;
+				y = window.event.clientY + document.documentElement.scrollTop + document.body.scrollTop;
+				if (document.body.offsetWidth < x + this.width) x = document.body.offsetWidth - this.width;
+			} else {
+				// Non-IE
+				// Mouse position from onmousemove event, seed with DIV position as x is undefined first time round
+				if (typeof(x) == 'undefined') {
+					var offset = jQuery('#FormButtons').offset();
+					x = offset.left + 400;
+					y = offset.top + 50;
+				}
+				document.onmousemove = function(e) {
+					x = e.clientX + window.scrollX;
+					y = e.clientY + window.scrollY;
+				}
+			}
+        } else if (typeof(this.x) !== 'undefined' && typeof(this.y) !== 'undefined') {
+            x = this.x;
+            y = this.y;
+        } else if (typeof(x) === 'undefined' || typeof(y) === 'undefined') {
+            x = 50;
+            y = this.height + 30;
+        }
+        if (typeof jQuery == 'function') {
+            jQuery('#print_dialog').html(sHTML);
+            jQuery('#print_dialog').width(this.width);
+            if (this.height>0) jQuery('#print_dialog').css('min-height',this.height);
+            jQuery('#print_dialog').css({'top':(y - (this.height + 30)) + 'px', 'left':(x - 50) + 'px'});
+        } else {
+            IfrRef.innerHTML = sHTML;
+            IfrRef.style.width = this.width;
+            if (this.height>0) IfrRef.style.height= this.height;
+            IfrRef.style.left = x - 50;
+            IfrRef.style.top = y - (this.height + 30);
+        }
+        if (this.recall) DrawRecall();
+        IfrRef.style.zIndex = 100;
+        IfrRef.style.display = "block";
+    }
+}
+
+function htmlDecode(value, preserveLineEnds){ 
+    if (value) {
+        value = String(value);
+        value = value
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>'); 
+        if (preserveLineEnds) { value = value.replace(/\n/g,'<BR>'); }
+        return value;
+    } else {
+        return '';
+    }
+}
+
+// function named htmlEscape as htmlEncode used in ckd_new
+function htmlEscape(value) { 
+    if (value) {
+        value = String(value);
+        value = value
+            .replace(/&/g, '&amp;') 
+            .replace(/"/g, '&quot;') 
+            .replace(/'/g, '&#39;') 
+            .replace(/</g, '&lt;') 
+            .replace(/>/g, '&gt;');
+        return value;
+    } else {
+        return '';
+    }
+}
+
+// yes I know this function is a copy of the same code from many files, but it solves the dependency issue right here and now!
+// Note: that we have both case-sensitive and case-insentive versions of this function in our code base, for safety any new copies
+// should be the case-insensitive version.
+function queryString(key){
+    var ary = window.location.search.substring(1).split('&');
+	key = key.toLowerCase();
+    for(var i=0; i<ary.length; i++){
+        var tagval = ary[i].split('=');
+        if(tagval[0].toLowerCase() === key){
+            return tagval[1];
+                }
+        }
+}
+
+//intended as a "global" function for writing to the DS_Error_Log table
+//this is a duplicate copy of code in medtech.js, also duplicated in popup_hover.js
+function LogWriteErrors(txtGuideline, txtSourceFileName, txtSourceDescription, txtErrorType, txtErrorMessage, txtErrorResolution){
+	var numSession = queryString('DSID');
+	if	(!numSession) numSession = queryString('SessionID');
+	if (!numSession || numSession === null || numSession === ''){
+		if (typeof loggingMetadata !== 'undefined' && loggingMetadata.sessionID !== 'undefined') {
+			numSession = loggingMetadata.sessionID;
+		} else {
+			numSession = '0';
+		}
+	}
+	var txtNHI = (queryString("txtNHI"))? queryString("txtNHI") : ((queryString("q_PD_NHI"))? queryString("q_PD_NHI") : 'nonhi');
+	if (txtNHI === 'nonhi') {
+		txtNHI = (jQuery('#PD_NHI').val())? jQuery('#PD_NHI').val() : 'nonhi';
+	}
+	if (txtNHI === 'nonhi') {
+			txtNHI = (typeof(MedTech) !== 'undefined' && typeof(MedTech.concept) !== 'undefined' && (MedTech.concept("PD_NHI").Value !== ''))? MedTech.concept("PD_NHI").Value : 'nonhi';
+	}
+	
+	var pms = queryString("PMS") || '';
+	var pms_detail = " (" + (typeof vNum === "undefined"?"":vNum) + "|" + (typeof MedTechIDstring === "undefined"?"":MedTechIDstring) + ")"
+	txtGuideline = txtGuideline + ((pms_detail === " (|)")? ("(" + pms + ")") : pms_detail);
+
+    var sMsg = "<txtGuideline>" + txtGuideline + "</txtGuideline>"
+    + "<numSession>" + numSession + "</numSession>"
+    + "<txtUsername>" + jQuery('#txtUName').val() + "</txtUsername>"
+    + "<txtNHI>" + txtNHI + "</txtNHI>"
+    + "<txtSourceFileName>" + txtSourceFileName + "</txtSourceFileName>"
+    + "<txtSourceDescription>" + txtSourceDescription + "</txtSourceDescription>"
+    + "<txtErrorType>" + txtErrorType + "</txtErrorType>"
+    + "<txtErrorMessage>" + txtErrorMessage + "</txtErrorMessage>"		
+    + "<txtErrorResolution>" + txtErrorResolution + "</txtErrorResolution>";
+    var boolSync = false;
+    if (txtSourceDescription === "Form Load"){
+        boolSync = true;
+    }		
+    var numID = callLogModuleWS(sMsg, 'LogError', 1000, boolSync);
+	return numID;
+}
+
+// Webservice Calls (TODO: could some of these be rolled together? E.g. all of them except callLogModuleWS)
+
+function callLogModuleWS(msgXML, msgType){
+    var msg = "<?xml version='1.0' encoding='utf-8'?>"
+        + "<soap:Envelope xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema' xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>"
+        + "<soap:Body>"
+        + "<" + msgType + " xmlns='http://tempuri.org/'>"
+        + msgXML.replace(/&/g, '&amp;')
+        + "</" + msgType + ">"
+        + "</soap:Body>"
+        + "</soap:Envelope>";
+
+    var returnVal = '{}';
+    var txtServer = window.location.protocol + "//" + document.location.host;
+    jQuery.ajax({
+        url:  txtServer + "/WebServices_Logging.asmx",
+        type: "POST",
+        dataType: "xml",
+        data: msg,
+        async: false,
+        contentType: "text/xml",
+        success: function(data, textStatus, xmlHTTP){
+            returnVal=data.text;
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+            returnVal={text: textStatus, error: errorThrown};
+        }
+    });
+
+    return returnVal;
+}
+
+
+/*
+ * escapeValue converts the characters "&", "<", ">", '"', and "'" in the given string to their corresponding HTML entities.
+ * Borrowed from underscoreJS, modified so that it doesn't convert / characters since it would affect dates, eg. 01/05/2019.
+ */
+function escapeValue(val) {
+	return (''+val).replace(/&(?!\w+;|#\d+;|#x[\da-f]+;)/gi, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+}
+
+// Update CSS style without jQuery
+function css(selector, property, value) {
+    for (var i=0; i<document.styleSheets.length;i++) {//Loop through all styles
+        //Try add rule
+        try { document.styleSheets[i].insertRule(selector+ ' {'+property+':'+value+'}', document.styleSheets[i].cssRules.length);
+        } catch(err) {try { document.styleSheets[i].addRule(selector, property+':'+value);} catch(err) {}}//IE
+    }
+}
+
+
+// Update misc. DIV widths to correctly display borders
+function Redraw_OutBox() {
+// jQuery not present prior to 31 July 2012
+    if(!window.jQuery) {
+        css('.TabBarTop','height','21px');
+        css('.FullBox','width','650px');
+        css('.PaddedBox','width','650px');
+        css('.TopBox','width','650px');
+        css('.PaddedTop','width','650px');
+        css('.Top_Hidden','width','650px');
+        css('.MidBox','width','650px');
+        css('.Mid_Hidden','width','650px');
+        css('.BottBox2','width','650px');
+        css('.BaseBox','width','650px');
+        css('.BottBox','width','652px');
+        if (document.title=='Green Prescription') css('.Subtitle','width','590px');
+    } else {
+// Presence of the name="DS_Date" meta tag should mean CSS has already been corrected
+        if (!jQuery("meta[name='DS_Date']").attr("content")) {
+            jQuery('.TabBarTop').css('height','21px');
+            jQuery('.FullBox,.PaddedBox,.TopBox,.PaddedTop,.Top_Hidden,.MidBox,.Mid_Hidden,.BottBox2,.BaseBox').css('width','650px');
+            jQuery('.BottBox').css('width','652px');
+            if (document.title=='Green Prescription') jQuery('.Subtitle').css('width','590px');
+        }
+    }
+}
+
+
+// reset CSS style if we're running as a stored document
+if (location.host === '' && document.styleSheets) {
+    document.onreadystatechange = function () {
+      var state = document.readyState;
+      if (state == 'complete') {
+
+//Get form width based upon first table. CSS is correct for 606px but requires updating for 650px
+          var nWidth = 0;
+          try {nWidth = parseInt(document.getElementsByTagName("TABLE")[0].width)} catch(err){};
+          if (nWidth!=606 || document.title=='Green Prescription') Redraw_OutBox();
+      }
+    };
+}
